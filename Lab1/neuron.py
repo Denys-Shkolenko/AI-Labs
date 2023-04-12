@@ -1,6 +1,6 @@
 class Neuron:
 
-    def __init__(self, value: int | float):
+    def __init__(self, value: float):
         self.value = value
 
     @property
@@ -9,6 +9,6 @@ class Neuron:
 
     @value.setter
     def value(self, value):
-        if not isinstance(value, (int, float)):
-            raise TypeError("the 'value' must be int or float")
+        if not isinstance(value, float):
+            raise TypeError("the 'value' must be a float")
         self.__value = value
