@@ -95,4 +95,19 @@ class Network:
             raise ValueError("learning_rate must be in range (0; 1)")
         self.__learning_rate = learning_rate
 
-    # def start_training(self):
+    def start_training(self):
+        # step 1
+        s_hidden_layer = []
+        for i in range(self.hidden_layer_quantity):
+            s_hidden_layer.append(sum(x * w for x, w in zip(
+                self.input_layer, self.weights_for_hidden_layer[i])))
+        print("s_hidden_layer =", s_hidden_layer)
+
+        # step 2
+        y_output = sum(s * w for s, w in zip(
+                s_hidden_layer, self.weights_for_output_neuron))
+        print("y_output =", y_output)
+
+        # step 3
+        delta = self.expected_value - y_output
+        print("delta =", delta)
