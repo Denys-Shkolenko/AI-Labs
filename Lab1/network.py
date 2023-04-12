@@ -1,5 +1,6 @@
 from typing import Sequence
 
+from functions import derivative_err_func
 from neuron import Neuron
 
 
@@ -21,13 +22,15 @@ class Network:
 
     @property
     def input_layer(self):
-        return self.__layer_1
+        return self.__input_layer
 
     @input_layer.setter
-    def input_layer(self, layer_1: Sequence[Neuron]):
-        if not all(isinstance(neuron, Neuron) for neuron in layer_1):
+    def input_layer(self, input_layer: Sequence[Neuron]):
+        if not len(input_layer):
+            raise ValueError("input_layer cannot be empty")
+        if not all(isinstance(neuron, Neuron) for neuron in input_layer):
             raise TypeError("each item of the input_layer must be a Neuron")
-        self.__layer_1 = layer_1
+        self.__input_layer = input_layer
 
     @property
     def weights_for_hidden_layer(self):
@@ -111,3 +114,35 @@ class Network:
         # step 3
         delta = self.expected_value - y_output
         print("delta =", delta)
+
+        # step 4
+        delta_hidden_layer = []
+        for i in range(self.hidden_layer_quantity):
+            delta_hidden_layer.append(
+                delta * self.weights_for_output_neuron[i] *
+                derivative_err_func(s_hidden_layer[i]))
+        print("delta_hidden_layer =", delta_hidden_layer)
+
+        # step 6
+        delta_w_output_layer = []
+        for i in range(self.hidden_layer_quantity):
+            delta_w_output_layer.append(
+                delta_hidden_layer[i] * self.learning_rate)
+        print("delta_w_output_layer =", delta_w_output_layer)
+
+        delta_w_hidden_layer = []
+        for sequence in self.weights_for_hidden_layer:
+            delta_w_hidden_layer.append(
+                [self.learning_rate * self.input_layer[i] *
+                 delta_hidden_layer[i] * weight
+                 for i, weight in enumerate(sequence)])
+        print("delta_w_hidden_layer =", delta_w_hidden_layer)
+
+        # step 7
+        for i, weight in enumerate(self.weights_for_output_neuron):
+            self.weights_for_output_neuron[i] = weight - delta_w_output_layer[i]
+        print("weights_for_output_neuron =", self.weights_for_output_neuron)
+
+        for i, weight in enumerate(self.weights_for_hidden_layer):
+            self.weights_for_hidden_layer[i] = weight - delta_w_hidden_layer[i]
+        print("weights_for_hidden_layer =", self.weights_for_hidden_layer)

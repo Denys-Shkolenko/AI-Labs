@@ -16,5 +16,8 @@ class Neuron:
     def __mul__(self, other):
         return self.value * other
 
+    def __rmul__(self, other):
+        return self.value * other
+
     def __str__(self):
         return str(self.value)
