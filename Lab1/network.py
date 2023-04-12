@@ -71,4 +71,28 @@ class Network:
             raise TypeError("expected_value must be a float")
         self.__expected_value = expected_value
 
+    @property
+    def hidden_layer_quantity(self):
+        return self.__hidden_layer_quantity
+
+    @hidden_layer_quantity.setter
+    def hidden_layer_quantity(self, hidden_layer_quantity):
+        if not isinstance(hidden_layer_quantity, int):
+            raise TypeError("hidden_layer_quantity must be an int")
+        if hidden_layer_quantity < 1:
+            raise ValueError("hidden_layer_quantity must be greater than 0")
+        self.__hidden_layer_quantity = hidden_layer_quantity
+
+    @property
+    def learning_rate(self):
+        return self.__learning_rate
+
+    @learning_rate.setter
+    def learning_rate(self, learning_rate):
+        if not isinstance(learning_rate, float):
+            raise TypeError("learning_rate must be a float")
+        if not 0.0 < learning_rate < 1.0:
+            raise ValueError("learning_rate must be in range (0; 1)")
+        self.__learning_rate = learning_rate
+
     # def start_training(self):
