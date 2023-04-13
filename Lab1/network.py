@@ -1,19 +1,20 @@
 from typing import Sequence
 
 from functions import derivative_err_func
-from neuron import Neuron
 
 
 class Network:
 
-    def __init__(self, input_layer: Sequence[Neuron],
+    def __init__(self, input_layer: Sequence[float],
                  init_weights_for_hidden_layer: Sequence[Sequence[float]],
                  init_weights_for_output_neuron: Sequence[float],
                  expected_value: float,
-                 hidden_layer_quantity=3,
-                 learning_rate=0.1):
+                 hidden_layer_quantity=3, learning_rate=0.1,
+                 eps=0.0001, max_iterations=1_000_000):
         self.hidden_layer_quantity = hidden_layer_quantity
         self.learning_rate = learning_rate
+        self.eps = eps
+        self.max_iterations = max_iterations
 
         self.input_layer = input_layer
         self.weights_for_hidden_layer = init_weights_for_hidden_layer
@@ -25,11 +26,11 @@ class Network:
         return self.__input_layer
 
     @input_layer.setter
-    def input_layer(self, input_layer: Sequence[Neuron]):
+    def input_layer(self, input_layer: Sequence[float]):
         if not len(input_layer):
             raise ValueError("input_layer cannot be empty")
-        if not all(isinstance(neuron, Neuron) for neuron in input_layer):
-            raise TypeError("each item of the input_layer must be a Neuron")
+        if not all(isinstance(number, float) for number in input_layer):
+            raise TypeError("each item of the input_layer must be a float")
         self.__input_layer = input_layer
 
     @property
@@ -99,53 +100,82 @@ class Network:
             raise ValueError("learning_rate must be in range (0; 1)")
         self.__learning_rate = learning_rate
 
+    @property
+    def eps(self):
+        return self.__eps
+
+    @eps.setter
+    def eps(self, eps):
+        if not isinstance(eps, float):
+            raise TypeError("eps must be a float")
+        self.__eps = eps
+
+    @property
+    def max_iterations(self):
+        return self.__max_iterations
+
+    @max_iterations.setter
+    def max_iterations(self, max_iterations):
+        if not isinstance(max_iterations, int):
+            raise TypeError("max_iterations must be an int")
+        if max_iterations < 1:
+            raise ValueError("max_iterations must be greater than 0")
+        self.__max_iterations = max_iterations
+
     def start_training(self):
-        # step 1
-        s_hidden_layer = []
-        for i in range(self.hidden_layer_quantity):
-            s_hidden_layer.append(sum(x * w for x, w in zip(
-                self.input_layer, self.weights_for_hidden_layer[i])))
-        print("1) s_hidden_layer =", s_hidden_layer)
+        iterations = 0
+        delta = self.eps + 1  # to start the loop
+        while delta > self.eps and iterations < self.max_iterations:
+            iterations += 1
 
-        # step 2
-        y_output = sum(s * w for s, w in zip(
-                s_hidden_layer, self.weights_for_output_neuron))
-        print("2) y_output =", y_output)
+            # step 1
+            s_hidden_layer = []
+            for i in range(self.hidden_layer_quantity):
+                s_hidden_layer.append(sum(x * w for x, w in zip(
+                    self.input_layer, self.weights_for_hidden_layer[i])))
+            print("1) s_hidden_layer =", s_hidden_layer)
 
-        # step 3
-        delta = self.expected_value - y_output
-        print("3) delta =", delta)
+            # step 2
+            y_output = sum(s * w for s, w in zip(
+                    s_hidden_layer, self.weights_for_output_neuron))
+            print("2) y_output =", y_output)
 
-        # step 4
-        delta_hidden_layer = []
-        for i in range(self.hidden_layer_quantity):
-            delta_hidden_layer.append(
-                delta * self.weights_for_output_neuron[i] *
-                derivative_err_func(s_hidden_layer[i]))
-        print("4) delta_hidden_layer =", delta_hidden_layer)
+            # step 3
+            delta = self.expected_value - y_output
+            print("3) delta =", delta)
 
-        # step 6
-        delta_w_output_layer = []
-        for i in range(self.hidden_layer_quantity):
-            delta_w_output_layer.append(
-                delta_hidden_layer[i] * self.learning_rate)
-        print("6) delta_w_output_layer =", delta_w_output_layer)
+            # step 4
+            delta_hidden_layer = []
+            for i in range(self.hidden_layer_quantity):
+                delta_hidden_layer.append(
+                    delta * self.weights_for_output_neuron[i] *
+                    derivative_err_func(s_hidden_layer[i]))
+            print("4) delta_hidden_layer =", delta_hidden_layer)
 
-        delta_w_hidden_layer = []
-        for sequence in self.weights_for_hidden_layer:
-            delta_w_hidden_layer.append(
-                [self.learning_rate * self.input_layer[i] *
-                 delta_hidden_layer[i] * weight
-                 for i, weight in enumerate(sequence)])
-        print("6) delta_w_hidden_layer =", delta_w_hidden_layer)
+            # step 6
+            delta_w_output_layer = []
+            for i in range(self.hidden_layer_quantity):
+                delta_w_output_layer.append(
+                    delta_hidden_layer[i] * self.learning_rate)
+            print("6) delta_w_output_layer =", delta_w_output_layer)
 
-        # step 7
-        for i, weight in enumerate(self.weights_for_output_neuron):
-            self.weights_for_output_neuron[i] = weight - delta_w_output_layer[i]
-        print("7) weights_for_output_neuron =", self.weights_for_output_neuron)
+            delta_w_hidden_layer = []
+            for sequence in self.weights_for_hidden_layer:
+                delta_w_hidden_layer.append(
+                    [self.learning_rate * self.input_layer[i] *
+                     delta_hidden_layer[i] * weight
+                     for i, weight in enumerate(sequence)])
+            print("6) delta_w_hidden_layer =", delta_w_hidden_layer)
 
-        for i, sequence in enumerate(self.weights_for_hidden_layer):
-            for j, weight in enumerate(sequence):
-                self.weights_for_hidden_layer[i][j] = weight - delta_w_hidden_layer[i][j]
+            # step 7
+            for i, weight in enumerate(self.weights_for_output_neuron):
+                self.weights_for_output_neuron[i] = weight - delta_w_output_layer[i]
+            print("7) weights_for_output_neuron =", self.weights_for_output_neuron)
 
-        print("7) weights_for_hidden_layer =", self.weights_for_hidden_layer)
+            for i, sequence in enumerate(self.weights_for_hidden_layer):
+                for j, weight in enumerate(sequence):
+                    self.weights_for_hidden_layer[i][j] = weight - delta_w_hidden_layer[i][j]
+
+            print("7) weights_for_hidden_layer =", self.weights_for_hidden_layer)
+
+    # TODO: output for reporting
