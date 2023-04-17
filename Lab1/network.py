@@ -6,7 +6,7 @@ from functions import derivative_err_func
 class Network:
     """
     The class describes a neural network with fixed input layer and
-    fixed hidden layer.
+    fixed hidden layer with the ability to learn.
 
     It is possible to change the values, but not the number of neurons that
     are set during initialization.
@@ -21,7 +21,8 @@ class Network:
                  hidden_layer_quantity=3,
                  learning_rate=0.1,
                  eps=0.0001,
-                 max_iterations=1_000_000):
+                 max_iterations=1_000_000,
+                 activation_func=derivative_err_func):
         if not isinstance(input_layer_quantity, int):
             raise TypeError("input_layer_quantity must be an int")
         if hidden_layer_quantity < 1:
@@ -37,6 +38,7 @@ class Network:
         self.learning_rate = learning_rate
         self.eps = eps
         self.max_iterations = max_iterations
+        self.activation_func = activation_func
 
         self.input_layer = input_layer
         self.weights_for_hidden_layer = init_weights_for_hidden_layer
@@ -173,7 +175,7 @@ class Network:
             for i in range(self.hidden_layer_quantity):
                 delta_hidden_layer.append(
                     delta * self.weights_for_output_neuron[i] *
-                    derivative_err_func(self.s_hidden_layer[i]))
+                    self.activation_func(self.s_hidden_layer[i]))
 
             # step 6
             delta_w_output_layer = []

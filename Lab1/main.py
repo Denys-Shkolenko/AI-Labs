@@ -1,5 +1,6 @@
 from tabulate import tabulate
 
+from functions import *
 from network import Network
 
 if __name__ == "__main__":
@@ -62,3 +63,32 @@ if __name__ == "__main__":
 
     print(tabulate(table, headers=["No.", "Input Layer", "Expected Value",
                                    "y", "Delta"], tablefmt="orgtbl"))
+
+    logic_OR_input = ((0.0, 0.0, 0.0),
+                      (1.0, 0.0, 1.0),
+                      (0.0, 1.0, 1.0),
+                      (1.0, 1.0, 1.0))
+
+    logic_OR_network = Network(
+        init_weights_for_hidden_layer=((1.0,), (1.0,)),
+        init_weights_for_output_neuron=(1.0,),
+        input_layer=(0.0, 0.0),
+        input_layer_quantity=2,
+        hidden_layer_quantity=1,
+        activation_func=logic_OR_activation_func)
+
+    table = []
+    for i, row in enumerate(logic_OR_input):
+        logic_OR_network.input_layer = (row[0], row[1])
+        logic_OR_network.expected_value = row[2]
+
+        iteration = logic_OR_network.start_training()
+        y = logic_OR_network.get_y()
+        # print(logic_OR_network.)
+
+        table.append([i + 1, ", ".join(str(num) for num in logic_OR_network.input_layer),
+                      logic_OR_network.expected_value, round(y, 4), iteration])
+
+    print("\n\n")
+    print(tabulate(table, headers=["No.", "Input Layer", "Expected Value",
+                                   "y", "Iterations"], tablefmt="orgtbl"))
