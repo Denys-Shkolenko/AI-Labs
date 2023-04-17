@@ -1,3 +1,5 @@
+from tabulate import tabulate
+
 from network import Network
 
 if __name__ == "__main__":
@@ -26,21 +28,27 @@ if __name__ == "__main__":
                       max_iterations=1_000_000,
                       learning_rate=0.1)
 
+
+    print("*" * 30, "TRAINING", "*" * 30)
+    table = []
     for i in range(len(input_data) - 5):
         network.input_layer = (input_data[i],
                                input_data[i + 1],
                                input_data[i + 2])
         network.expected_value = input_data[i + 3]
 
-        print(network.input_layer, network.expected_value)
-        print("iterations:", network.start_training())
-        print("y = {:.4f}".format(network.get_y()))
-        # print(network.weights_for_hidden_layer)
-        # print(network.weights_for_output_neuron)
-        print("-")
+        iteration = network.start_training()
+        y = network.get_y()
 
-    print("testing")
+        table.append([i + 1, ", ".join(str(num) for num in network.input_layer),
+                      network.expected_value, round(y, 4), iteration])
 
+    print(tabulate(table, headers=["No.", "Input Layer", "Expected Value",
+                                   "y", "Iterations"], tablefmt="orgtbl"))
+
+
+    print("\n\n" + "*" * 30, "TESTING", "*" * 30)
+    table = []
     for i in range(len(input_data) - 3):
         network.input_layer = (input_data[i],
                                input_data[i + 1],
@@ -49,9 +57,10 @@ if __name__ == "__main__":
 
         y = network.get_y()
         expected = network.expected_value
+        delta = abs(y - expected)
 
-        print(network.input_layer, expected)
-        print("y = {:.4f}".format(y))
-        print("delta = {:.4f}".format(y - expected))
-        print("-")
+        table.append([i + 1, ", ".join(str(num) for num in network.input_layer),
+                      network.expected_value, round(y, 4), round(delta, 4)])
 
+    print(tabulate(table, headers=["No.", "Input Layer", "Expected Value",
+                                   "y", "Delta"], tablefmt="orgtbl"))
