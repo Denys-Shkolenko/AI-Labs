@@ -4,38 +4,37 @@ from network import Network
 
 if __name__ == "__main__":
 
-    # init_weights_for_hidden_layer = ((w14, w15, w16),
+    # INIT_WEIGHTS_FOR_HIDDEN_LAYER = ((w14, w15, w16),
     #                                  (w24, w25, w26),
     #                                  (w34, w35, w36)) = ((0.2, 0.4, 0.2),
     #                                                      (0.2, 0.5, 2.4),
     #                                                      (0.3, 1.6, 0.5))
-    #
-    # init_weights_for_output_neuron = (w47, w57, w67) = (0.3, 0.5, 0.1)
+    # 
+    # INIT_WEIGHTS_FOR_HIDDEN_LAYER = (w47, w57, w67) = (0.3, 0.5, 0.1)
 
-    init_weights_for_hidden_layer = ((w14, w15, w16),
+    INIT_WEIGHTS_FOR_HIDDEN_LAYER = ((w14, w15, w16),
                                      (w24, w25, w26),
                                      (w34, w35, w36)) = ((1.0, 1.0, 1.0),
                                                          (1.0, 1.0, 1.0),
                                                          (1.0, 1.0, 1.0))
 
-    init_weights_for_output_neuron = (w47, w57, w67) = (1.0, 1.0, 1.0)
+    INIT_WEIGHTS_FOR_OUTPUT_NEURON = (w47, w57, w67) = (1.0, 1.0, 1.0)
 
-    input_data = (2.57, 4.35, 1.27, 5.46, 1.30, 4.92, 1.31,
+    INPUT_DATA = (2.57, 4.35, 1.27, 5.46, 1.30, 4.92, 1.31,
                   4.14, 1.97, 5.67, 0.92, 4.76, 1.72, 4.44, 1.49)
 
-    network = Network(init_weights_for_hidden_layer,
-                      init_weights_for_output_neuron,
+    network = Network(INIT_WEIGHTS_FOR_HIDDEN_LAYER,
+                      INIT_WEIGHTS_FOR_OUTPUT_NEURON,
                       max_iterations=1_000_000,
                       learning_rate=0.1)
 
-
     print("*" * 30, "TRAINING", "*" * 30)
     table = []
-    for i in range(len(input_data) - 5):
-        network.input_layer = (input_data[i],
-                               input_data[i + 1],
-                               input_data[i + 2])
-        network.expected_value = input_data[i + 3]
+    for i in range(len(INPUT_DATA) - 5):
+        network.input_layer = (INPUT_DATA[i],
+                               INPUT_DATA[i + 1],
+                               INPUT_DATA[i + 2])
+        network.expected_value = INPUT_DATA[i + 3]
 
         iteration = network.start_training()
         y = network.get_y()
@@ -46,14 +45,13 @@ if __name__ == "__main__":
     print(tabulate(table, headers=["No.", "Input Layer", "Expected Value",
                                    "y", "Iterations"], tablefmt="orgtbl"))
 
-
     print("\n\n" + "*" * 30, "TESTING", "*" * 30)
     table = []
-    for i in range(len(input_data) - 3):
-        network.input_layer = (input_data[i],
-                               input_data[i + 1],
-                               input_data[i + 2])
-        network.expected_value = input_data[i + 3]
+    for i in range(len(INPUT_DATA) - 3):
+        network.input_layer = (INPUT_DATA[i],
+                               INPUT_DATA[i + 1],
+                               INPUT_DATA[i + 2])
+        network.expected_value = INPUT_DATA[i + 3]
 
         y = network.get_y()
         expected = network.expected_value
