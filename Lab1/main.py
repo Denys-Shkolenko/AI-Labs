@@ -5,21 +5,21 @@ from network import Network
 
 if __name__ == "__main__":
 
-    # INIT_WEIGHTS_FOR_HIDDEN_LAYER = ((w14, w15, w16),
-    #                                  (w24, w25, w26),
-    #                                  (w34, w35, w36)) = ((0.2, 0.4, 0.2),
-    #                                                      (0.2, 0.5, 2.4),
-    #                                                      (0.3, 1.6, 0.5))
-    # 
-    # INIT_WEIGHTS_FOR_HIDDEN_LAYER = (w47, w57, w67) = (0.3, 0.5, 0.1)
-
     INIT_WEIGHTS_FOR_HIDDEN_LAYER = ((w14, w15, w16),
                                      (w24, w25, w26),
-                                     (w34, w35, w36)) = ((1.0, 1.0, 1.0),
-                                                         (1.0, 1.0, 1.0),
-                                                         (1.0, 1.0, 1.0))
+                                     (w34, w35, w36)) = ((0.2, 0.4, 0.2),
+                                                         (0.2, 0.5, 2.4),
+                                                         (0.3, 1.6, 0.5))
 
-    INIT_WEIGHTS_FOR_OUTPUT_NEURON = (w47, w57, w67) = (1.0, 1.0, 1.0)
+    INIT_WEIGHTS_FOR_OUTPUT_NEURON = (w47, w57, w67) = (3.0, 4.0, 1.0)
+
+    # INIT_WEIGHTS_FOR_HIDDEN_LAYER = ((w14, w15, w16),
+    #                                  (w24, w25, w26),
+    #                                  (w34, w35, w36)) = ((1.0, 1.0, 1.0),
+    #                                                      (1.0, 1.0, 1.0),
+    #                                                      (1.0, 1.0, 1.0))
+    #
+    # INIT_WEIGHTS_FOR_OUTPUT_NEURON = (w47, w57, w67) = (1.0, 1.0, 1.0)
 
     INPUT_DATA = (2.57, 4.35, 1.27, 5.46, 1.30, 4.92, 1.31,
                   4.14, 1.97, 5.67, 0.92, 4.76, 1.72, 4.44, 1.49)
@@ -39,6 +39,9 @@ if __name__ == "__main__":
 
         iteration = network.start_training()
         y = network.get_y()
+        # print("h:", network.weights_for_hidden_layer)
+        # print("o:", network.weights_for_output_neuron)
+        # print("-")
 
         table.append([i + 1, ", ".join(str(num) for num in network.input_layer),
                       network.expected_value, round(y, 4), iteration])
@@ -64,31 +67,31 @@ if __name__ == "__main__":
     print(tabulate(table, headers=["No.", "Input Layer", "Expected Value",
                                    "y", "Delta"], tablefmt="orgtbl"))
 
-    logic_OR_input = ((0.0, 0.0, 0.0),
-                      (1.0, 0.0, 1.0),
-                      (0.0, 1.0, 1.0),
-                      (1.0, 1.0, 1.0))
-
-    logic_OR_network = Network(
-        init_weights_for_hidden_layer=((1.0,), (1.0,)),
-        init_weights_for_output_neuron=(1.0,),
-        input_layer=(0.0, 0.0),
-        input_layer_quantity=2,
-        hidden_layer_quantity=1,
-        activation_func=logic_OR_activation_func)
-
-    table = []
-    for i, row in enumerate(logic_OR_input):
-        logic_OR_network.input_layer = (row[0], row[1])
-        logic_OR_network.expected_value = row[2]
-
-        iteration = logic_OR_network.start_training()
-        y = logic_OR_network.get_y()
-        # print(logic_OR_network.)
-
-        table.append([i + 1, ", ".join(str(num) for num in logic_OR_network.input_layer),
-                      logic_OR_network.expected_value, round(y, 4), iteration])
-
-    print("\n\n")
-    print(tabulate(table, headers=["No.", "Input Layer", "Expected Value",
-                                   "y", "Iterations"], tablefmt="orgtbl"))
+    # logic_OR_input = ((0.0, 0.0, 0.0),
+    #                   (1.0, 0.0, 1.0),
+    #                   (0.0, 1.0, 1.0),
+    #                   (1.0, 1.0, 1.0))
+    #
+    # logic_OR_network = Network(
+    #     init_weights_for_hidden_layer=((1.0,), (1.0,)),
+    #     init_weights_for_output_neuron=(1.0,),
+    #     input_layer=(0.0, 0.0),
+    #     input_layer_quantity=2,
+    #     hidden_layer_quantity=1,
+    #     activation_func=logic_OR_activation_func)
+    #
+    # table = []
+    # for i, row in enumerate(logic_OR_input):
+    #     logic_OR_network.input_layer = (row[0], row[1])
+    #     logic_OR_network.expected_value = row[2]
+    #
+    #     iteration = logic_OR_network.start_training()
+    #     y = logic_OR_network.get_y()
+    #     # print(logic_OR_network.)
+    #
+    #     table.append([i + 1, ", ".join(str(num) for num in logic_OR_network.input_layer),
+    #                   logic_OR_network.expected_value, round(y, 4), iteration])
+    #
+    # print("\n\n")
+    # print(tabulate(table, headers=["No.", "Input Layer", "Expected Value",
+    #                                "y", "Iterations"], tablefmt="orgtbl"))
