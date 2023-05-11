@@ -1,3 +1,4 @@
+import numpy as np
 from typing import Sequence
 
 from functions import derivative_err_func
@@ -22,7 +23,9 @@ class Network:
                  learning_rate=0.1,
                  eps=0.0001,
                  max_iterations=1_000_000,
-                 activation_func=derivative_err_func):
+                 activation_func=derivative_err_func,
+                 input_data=(2.57, 4.35, 1.27, 5.46, 1.30, 4.92, 1.31, 4.14,
+                             1.97, 5.67, 0.92, 4.76, 1.72)):
         if not isinstance(input_layer_quantity, int):
             raise TypeError("input_layer_quantity must be an int")
         if hidden_layer_quantity < 1:
@@ -48,6 +51,8 @@ class Network:
         # save the state of the weighted sums used in the get_y() and
         # start_training() functions
         self.s_hidden_layer = []
+
+        self.input_data = input_data
 
     @property
     def weights_for_hidden_layer(self):
@@ -227,3 +232,64 @@ class Network:
         # print("2) y_output =", y_output)
 
         return y_output
+
+    def start_training2(self) -> int:
+        iterations = 0
+        # delta = self.eps + 1  # to start the loop
+        # while abs(delta) > self.eps and iterations < self.max_iterations:
+        delta_w_output_layer_values = []
+        delta_w_hidden_layer_values = []
+
+        iterations += 1
+        for m in range(len(self.input_data) - 3):
+            self.input_layer = (self.input_data[m],
+                                self.input_data[m + 1],
+                                self.input_data[m + 2])
+            self.expected_value = self.input_data[m + 3]
+
+            # step 1-2
+            y_output = self.get_y()
+
+            # step 3
+            delta = self.expected_value - y_output
+            # print("3) delta =", delta)
+
+            # step 4
+            delta_hidden_layer = []
+            for i in range(self.hidden_layer_quantity):
+                delta_hidden_layer.append(
+                    delta * self.weights_for_output_neuron[i] *
+                    self.activation_func(self.s_hidden_layer[i]))
+            # print("4) delta_hidden_layer =", delta_hidden_layer)
+
+            # step 6
+            delta_w_output_layer = []
+            for i in range(self.hidden_layer_quantity):
+                delta_w_output_layer.append(
+                    delta_hidden_layer[i] * self.learning_rate)
+            # print("6) delta_w_output_layer =", delta_w_output_layer)
+            delta_w_output_layer_values.append(delta_w_output_layer)
+
+            delta_w_hidden_layer = []
+            for i, sequence in enumerate(self.weights_for_hidden_layer):
+                delta_w_hidden_layer.append(
+                    [self.learning_rate * self.input_layer[i] *
+                     delta_hidden_layer[i] * weight
+                     for weight in sequence])
+            # print("6) delta_w_hidden_layer =", delta_w_hidden_layer)
+            delta_w_hidden_layer_values.append(delta_w_hidden_layer)
+
+        average_delta_w_output_layer = np.mean(delta_w_output_layer_values, axis=0)
+        average_delta_w_hidden_layer = np.mean(delta_w_hidden_layer_values, axis=0)
+
+        # step 7
+        for i, weight in enumerate(self.weights_for_output_neuron):
+            self.weights_for_output_neuron[i] = weight + average_delta_w_output_layer[i]
+        print("7) weights_for_output_neuron =", self.weights_for_output_neuron)
+
+        for i, sequence in enumerate(self.weights_for_hidden_layer):
+            for j, weight in enumerate(sequence):
+                self.weights_for_hidden_layer[i][j] = weight + average_delta_w_hidden_layer[i][j]
+        print("7) weights_for_hidden_layer =", self.weights_for_hidden_layer)
+
+        return iterations
