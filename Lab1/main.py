@@ -7,11 +7,11 @@ if __name__ == "__main__":
 
     INIT_WEIGHTS_FOR_HIDDEN_LAYER = ((w14, w15, w16),
                                      (w24, w25, w26),
-                                     (w34, w35, w36)) = ((2.0, 0.1, 1.1),
-                                                         (0.1, 2.0, 0.9),
-                                                         (2.0, 0.1, 1.0))
+                                     (w34, w35, w36)) = ((1.1, 0.2, 0.1),
+                                                         (0.1, 2.3, 0.2),
+                                                         (1.0, 0.1, 0.1))
 
-    INIT_WEIGHTS_FOR_OUTPUT_NEURON = (w47, w57, w67) = (1.1, 0.9, 1.0)
+    INIT_WEIGHTS_FOR_OUTPUT_NEURON = (w47, w57, w67) = (0.8, 0.7, 0.9)
 
     # INIT_WEIGHTS_FOR_HIDDEN_LAYER = ((w14, w15, w16),
     #                                  (w24, w25, w26),
@@ -24,74 +24,79 @@ if __name__ == "__main__":
     INPUT_DATA = (2.57, 4.35, 1.27, 5.46, 1.30, 4.92, 1.31,
                   4.14, 1.97, 5.67, 0.92, 4.76, 1.72, 4.44, 1.49)
 
+    # training with average weights
+
+    network1 = Network(INIT_WEIGHTS_FOR_HIDDEN_LAYER,
+                       INIT_WEIGHTS_FOR_OUTPUT_NEURON,
+                       max_iterations=1_000_000,
+                       learning_rate=0.1,
+                       input_data=INPUT_DATA)
+
+    print("1.")
+    print("*" * 20, "TRAINING WITH AVERAGE WEIGHTS", "*" * 20)
+    table1 = []
+    network1.start_training_with_average_weights(850)
+    for i in range(len(INPUT_DATA) - 3):
+        network1.input_layer = (INPUT_DATA[i],
+                                INPUT_DATA[i + 1],
+                                INPUT_DATA[i + 2])
+        network1.expected_value = INPUT_DATA[i + 3]
+
+        y = network1.get_y()
+        delta = abs(y - network1.expected_value)
+
+        table1.append([i + 1, ", ".join(str(num) for num in network1.input_layer),
+                      network1.expected_value, round(y, 4), round(delta, 4)])
+
+    print(tabulate(table1, headers=["No.", "Input Layer", "Expected Value",
+                                    "y", "Delta"], tablefmt="orgtbl"))
+    print("\n")
+
+    # training
+
     network2 = Network(INIT_WEIGHTS_FOR_HIDDEN_LAYER,
                        INIT_WEIGHTS_FOR_OUTPUT_NEURON,
                        max_iterations=1_000_000,
                        learning_rate=0.1)
 
-    for _ in range(1000):
-        print("*" * 30, "TRAINING", "*" * 30)
-        table2 = []
-        network2.start_training2()
-        for i in range(len(INPUT_DATA) - 3):
-            network2.input_layer = (INPUT_DATA[i],
-                                    INPUT_DATA[i + 1],
-                                    INPUT_DATA[i + 2])
-            network2.expected_value = INPUT_DATA[i + 3]
+    print("2.")
+    print("*" * 30, "TRAINING", "*" * 30)
+    table2 = []
+    for i in range(len(INPUT_DATA) - 5):
+        network2.input_layer = (INPUT_DATA[i],
+                                INPUT_DATA[i + 1],
+                                INPUT_DATA[i + 2])
+        network2.expected_value = INPUT_DATA[i + 3]
 
-            y = network2.get_y()
-            delta = abs(y - network2.expected_value)
+        iteration = network2.start_training()
+        y = network2.get_y()
 
-            table2.append([i + 1, ", ".join(str(num) for num in network2.input_layer),
-                          network2.expected_value, round(y, 4), round(delta, 4)])
+        table2.append([i + 1, ", ".join(str(num) for num in network2.input_layer),
+                      network2.expected_value, round(y, 4), iteration])
 
-        print(tabulate(table2, headers=["No.", "Input Layer", "Expected Value",
-                                        "y", "Delta"], tablefmt="orgtbl"))
+    print(tabulate(table2, headers=["No.", "Input Layer", "Expected Value",
+                                    "y", "Iterations"], tablefmt="orgtbl"))
+    print("\n")
 
+    # testing
 
+    print("*" * 30, "TESTING", "*" * 30)
+    table3 = []
+    for i in range(len(INPUT_DATA) - 3):
+        network2.input_layer = (INPUT_DATA[i],
+                                INPUT_DATA[i + 1],
+                                INPUT_DATA[i + 2])
+        network2.expected_value = INPUT_DATA[i + 3]
 
-    # network = Network(INIT_WEIGHTS_FOR_HIDDEN_LAYER,
-    #                   INIT_WEIGHTS_FOR_OUTPUT_NEURON,
-    #                   max_iterations=1_000_000,
-    #                   learning_rate=0.1)
-    #
-    # print("*" * 30, "TRAINING", "*" * 30)
-    # table = []
-    # for i in range(len(INPUT_DATA) - 5):
-    #     network.input_layer = (INPUT_DATA[i],
-    #                            INPUT_DATA[i + 1],
-    #                            INPUT_DATA[i + 2])
-    #     network.expected_value = INPUT_DATA[i + 3]
-    #
-    #     iteration = network.start_training()
-    #     y = network.get_y()
-    #     # print("h:", network.weights_for_hidden_layer)
-    #     # print("o:", network.weights_for_output_neuron)
-    #     # print("-")
-    #
-    #     table.append([i + 1, ", ".join(str(num) for num in network.input_layer),
-    #                   network.expected_value, round(y, 4), iteration])
-    #
-    # print(tabulate(table, headers=["No.", "Input Layer", "Expected Value",
-    #                                "y", "Iterations"], tablefmt="orgtbl"))
-    #
-    # print("\n\n" + "*" * 30, "TESTING", "*" * 30)
-    # table = []
-    # for i in range(len(INPUT_DATA) - 3):
-    #     network.input_layer = (INPUT_DATA[i],
-    #                            INPUT_DATA[i + 1],
-    #                            INPUT_DATA[i + 2])
-    #     network.expected_value = INPUT_DATA[i + 3]
-    #
-    #     y = network.get_y()
-    #     expected = network.expected_value
-    #     delta = abs(y - expected)
-    #
-    #     table.append([i + 1, ", ".join(str(num) for num in network.input_layer),
-    #                   network.expected_value, round(y, 4), round(delta, 4)])
-    #
-    # print(tabulate(table, headers=["No.", "Input Layer", "Expected Value",
-    #                                "y", "Delta"], tablefmt="orgtbl"))
+        y = network2.get_y()
+        expected = network2.expected_value
+        delta = abs(y - expected)
+
+        table3.append([i + 1, ", ".join(str(num) for num in network2.input_layer),
+                      network2.expected_value, round(y, 4), round(delta, 4)])
+
+    print(tabulate(table3, headers=["No.", "Input Layer", "Expected Value",
+                                    "y", "Delta"], tablefmt="orgtbl"))
 
     # logic_OR_input = ((0.0, 0.0, 0.0),
     #                   (1.0, 0.0, 1.0),
