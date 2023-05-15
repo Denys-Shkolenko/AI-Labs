@@ -1,3 +1,5 @@
+from operator import itemgetter
+
 import numpy as np
 from typing import Sequence
 
@@ -217,7 +219,7 @@ class Network:
         self.s_hidden_layer.clear()
         for i in range(self.hidden_layer_quantity):
             self.s_hidden_layer.append(sum(x * w for x, w in zip(
-                self.input_layer, self.weights_for_hidden_layer[i])))
+                self.input_layer, list(map(itemgetter(0), self.weights_for_hidden_layer)))))
 
         # step 2
         y_output = sum(s * w for s, w in zip(

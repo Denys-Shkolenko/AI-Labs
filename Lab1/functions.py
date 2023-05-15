@@ -19,4 +19,4 @@ def logic_NOT_activation_func(s: float) -> bool:
 
 
 def logic_XOR_activation_func(s: float) -> bool:
-    return s >= 0.5
+    return s == 1.0
