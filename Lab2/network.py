@@ -39,7 +39,7 @@ class Network:
         self.__number_of_hidden_layers = len(sizes_of_hidden_layers)
         self.__number_of_layers = self.__number_of_hidden_layers + 2
         self.__sizes = [size_of_input_layer, *sizes_of_hidden_layers, size_of_output_layer]
-        self.__s_of_layers = [[0]]
+        self.__s_of_layers = [[0] for _ in range(self.__number_of_hidden_layers + 1)]
 
         self.learning_rate = learning_rate
         self.eps = eps
