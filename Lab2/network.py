@@ -155,28 +155,27 @@ class Network:
             for i in range(self.__number_of_hidden_layers, 0, -1):
                 w_delta = []
                 for j in range(self.sizes_of_hidden_layers[i - 1]):
-                    w_delta.append(deltas[self.__number_of_hidden_layers - i + 1][j] * self.learning_rate)
-                w_deltas.append(w_delta)
-            print(w_deltas)
-
+                    w_delta.append([self.learning_rate * d
+                                    for d in deltas[self.__number_of_hidden_layers - i + 1][j]])
+                w_deltas.insert(0, w_delta)
 
             # for input layer
-            # for i in range(self.size_of_input_layer):
-            #     w_delta = []
-
-            # for i, sequence in enumerate(self.weights_for_hidden_layer):
-            #     delta_w_hidden_layer.append(
-            #         [self.learning_rate * self.input_layer[i] *
-            #          delta_hidden_layer[i] * weight
-            #          for weight in sequence])
+            w_deltas_for_input_layer = []
+            for i, weights in enumerate(self.weights[0]):
+                w_delta = []
+                for j, weight in enumerate(weights):
+                    w_delta.append(
+                        weight * self.__s_of_layers[0][i] * self.learning_rate *
+                        sum(deltas[-1][j]) / len(deltas[-1][j])
+                    )
+                w_deltas_for_input_layer.append(w_delta)
+            w_deltas.insert(0, w_deltas_for_input_layer)
 
             # step 7
-            # for i, weight in enumerate(self.weights_for_output_neuron):
-            #     self.weights_for_output_neuron[i] = weight + delta_w_output_layer[i]
-            #
-            # for i, sequence in enumerate(self.weights_for_hidden_layer):
-            #     for j, weight in enumerate(sequence):
-            #         self.weights_for_hidden_layer[i][j] = weight + delta_w_hidden_layer[i][j]
+            for i, weights_list in enumerate(w_deltas):
+                for j, weights in enumerate(weights_list):
+                    for k, weight in enumerate(weights):
+                        self.weights[i][j][k] = weight + w_deltas[i][j][k]
 
         return iterations
 
