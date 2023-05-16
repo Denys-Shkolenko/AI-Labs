@@ -6,6 +6,9 @@ if __name__ == "__main__":
                       sizes_of_hidden_layers=(3, 2),
                       size_of_output_layer=2)
     INPUT_DATA = (1, 1, 1)
+    EXPECTED_VALUES = (10.0, 10.0)
     network.set_input_data(INPUT_DATA)
+    network.set_expected_values(EXPECTED_VALUES)
 
-    print(network.get_y())
+    network.start_training()
+

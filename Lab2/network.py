@@ -9,8 +9,8 @@ from functions import derivative_err_func
 class Network:
 
     def __init__(self,
-                 size_of_input_layer=3,
-                 sizes_of_hidden_layers=(3, 2),
+                 size_of_input_layer=36,
+                 sizes_of_hidden_layers=(36, 30),
                  size_of_output_layer=2,
                  default_weight=1.0,
                  learning_rate=0.1,
@@ -37,7 +37,8 @@ class Network:
         self.__size_of_output_layer = size_of_output_layer
 
         self.__number_of_hidden_layers = len(sizes_of_hidden_layers)
-        # self.__number_of_layers = self.__number_of_hidden_layers + 2
+        self.__number_of_layers = self.__number_of_hidden_layers + 2
+        self.__sizes = [size_of_input_layer, *sizes_of_hidden_layers, size_of_output_layer]
         self.__s_of_layers = []
 
         self.learning_rate = learning_rate
@@ -102,9 +103,6 @@ class Network:
     def number_of_hidden_layers(self):
         return self.__number_of_hidden_layers
 
-    def get_input_data(self):
-        return self.__s_of_layers[0]
-
     def set_input_data(self, input_data: Sequence[int]):
         if not input_data:
             raise ValueError("input_data cannot be empty")
@@ -115,24 +113,40 @@ class Network:
             raise TypeError("each item of the input_data must be an int")
         self.__s_of_layers.insert(0, input_data)
 
+    def set_expected_values(self, expected_values: Sequence[float]):
+        if not expected_values:
+            raise ValueError("expected_values cannot be empty")
+        if len(expected_values) != self.size_of_output_layer:
+            raise ValueError("the len of expected_values must be equal to the "
+                             "size_of_output_layer parameter")
+        if not all(isinstance(number, float) for number in expected_values):
+            raise TypeError("each item of the input_data must be an int")
+        self.__expected_values = expected_values
+
     def start_training(self) -> int:
         iterations = 0
-        delta = self.eps + 1  # to start the loop
-        while abs(delta) > self.eps and iterations < self.max_iterations:
+        # delta = self.eps + 1  # to start the loop
+        while abs(100) > self.eps and iterations < self.max_iterations:
             iterations += 1
 
             # step 1-2
             y_output = self.get_y()
 
             # step 3
-            delta = self.expected_value - y_output
+            deltas = []
+            if not self.__expected_values:
+                raise ValueError("expected_values is empty")
+            deltas.append([expected - y for expected, y in zip(self.__expected_values, y_output)])
 
             # step 4
-            delta_hidden_layer = []
-            for i in range(self.hidden_layer_quantity):
-                delta_hidden_layer.append(
-                    delta * self.weights_for_output_neuron[i] *
-                    self.activation_func(self.s_hidden_layer[i]))
+            for i in range(self.__number_of_hidden_layers, 0, -1):
+                average_deltas = []
+                for j in range(self.sizes_of_hidden_layers[i - 1]):
+                    average_deltas.append(
+                        sum(self.activation_func(self.__s_of_layers[i][j]) * d * w
+                            for d, w in zip(deltas[-1], self.weights[i][j]))
+                        / self.size_of_output_layer)
+                deltas.append(average_deltas)
 
             # step 6
             delta_w_output_layer = []
@@ -158,6 +172,9 @@ class Network:
         return iterations
 
     def get_y(self) -> list[float]:
+        if not self.__s_of_layers:
+            raise ValueError("input data is empty")
+
         # step 1
         for i in range(self.number_of_hidden_layers):
             weighted_sums = []
