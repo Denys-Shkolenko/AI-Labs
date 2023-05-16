@@ -11,7 +11,7 @@ class Network:
     def __init__(self,
                  size_of_input_layer=36,
                  sizes_of_hidden_layers=(36, 30),
-                 size_of_output_layer=2,
+                 size_of_output_layer=3,
                  default_weight=0.1,
                  learning_rate=0.1,
                  eps=0.0001,
@@ -119,7 +119,7 @@ class Network:
         if len(expected_values) != self.size_of_output_layer:
             raise ValueError("the len of expected_values must be equal to the "
                              "size_of_output_layer parameter")
-        if not all(isinstance(number, float) for number in expected_values):
+        if not all(isinstance(number, int) for number in expected_values):
             raise TypeError("each item of the input_data must be an int")
         self.__expected_values = expected_values
 
@@ -131,7 +131,7 @@ class Network:
 
             # step 1-2
             y_output = self.get_y()
-            print("y_output", y_output)
+            # print("y_output", y_output)
 
             # step 3
             deltas = []
@@ -141,7 +141,7 @@ class Network:
             # print("3. deltas", deltas)
 
             accuracy = max(abs(*d) for d in deltas[0])
-            print(accuracy)
+            # print(accuracy)
 
             # step 4
             for i in range(self.__number_of_hidden_layers, 0, -1):
