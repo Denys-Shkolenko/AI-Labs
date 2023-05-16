@@ -136,38 +136,47 @@ class Network:
             deltas = []
             if not self.__expected_values:
                 raise ValueError("expected_values is empty")
-            deltas.append([expected - y for expected, y in zip(self.__expected_values, y_output)])
+            deltas.append([[expected - y] for expected, y in zip(self.__expected_values, y_output)])
 
             # step 4
             for i in range(self.__number_of_hidden_layers, 0, -1):
-                average_deltas = []
+                temp_deltas = []
                 for j in range(self.sizes_of_hidden_layers[i - 1]):
-                    average_deltas.append(
-                        sum(self.activation_func(self.__s_of_layers[i][j]) * d * w
-                            for d, w in zip(deltas[-1], self.weights[i][j]))
-                        / self.size_of_output_layer)
-                deltas.append(average_deltas)
+                    temp_deltas.append([
+                        self.activation_func(self.__s_of_layers[i][j]) * sum(d) / len(d) * w
+                        for d, w in zip(deltas[-1], self.weights[i][j])
+                    ])
+                deltas.append(temp_deltas)
 
             # step 6
-            delta_w_output_layer = []
-            for i in range(self.hidden_layer_quantity):
-                delta_w_output_layer.append(
-                    delta_hidden_layer[i] * self.learning_rate)
+            w_deltas = []
 
-            delta_w_hidden_layer = []
-            for i, sequence in enumerate(self.weights_for_hidden_layer):
-                delta_w_hidden_layer.append(
-                    [self.learning_rate * self.input_layer[i] *
-                     delta_hidden_layer[i] * weight
-                     for weight in sequence])
+            # for hidden and output layers
+            for i in range(self.__number_of_hidden_layers, 0, -1):
+                w_delta = []
+                for j in range(self.sizes_of_hidden_layers[i - 1]):
+                    w_delta.append(deltas[self.__number_of_hidden_layers - i + 1][j] * self.learning_rate)
+                w_deltas.append(w_delta)
+            print(w_deltas)
+
+
+            # for input layer
+            # for i in range(self.size_of_input_layer):
+            #     w_delta = []
+
+            # for i, sequence in enumerate(self.weights_for_hidden_layer):
+            #     delta_w_hidden_layer.append(
+            #         [self.learning_rate * self.input_layer[i] *
+            #          delta_hidden_layer[i] * weight
+            #          for weight in sequence])
 
             # step 7
-            for i, weight in enumerate(self.weights_for_output_neuron):
-                self.weights_for_output_neuron[i] = weight + delta_w_output_layer[i]
-
-            for i, sequence in enumerate(self.weights_for_hidden_layer):
-                for j, weight in enumerate(sequence):
-                    self.weights_for_hidden_layer[i][j] = weight + delta_w_hidden_layer[i][j]
+            # for i, weight in enumerate(self.weights_for_output_neuron):
+            #     self.weights_for_output_neuron[i] = weight + delta_w_output_layer[i]
+            #
+            # for i, sequence in enumerate(self.weights_for_hidden_layer):
+            #     for j, weight in enumerate(sequence):
+            #         self.weights_for_hidden_layer[i][j] = weight + delta_w_hidden_layer[i][j]
 
         return iterations
 
