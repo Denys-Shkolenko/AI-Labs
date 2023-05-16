@@ -12,7 +12,7 @@ class Network:
                  size_of_input_layer=36,
                  sizes_of_hidden_layers=(36, 30),
                  size_of_output_layer=2,
-                 default_weight=1.0,
+                 default_weight=0.1,
                  learning_rate=0.1,
                  eps=0.0001,
                  max_iterations=1_000_000,
@@ -125,18 +125,23 @@ class Network:
 
     def start_training(self) -> int:
         iterations = 0
-        # delta = self.eps + 1  # to start the loop
-        while abs(100) > self.eps and iterations < self.max_iterations:
+        accuracy = self.eps + 1.0  # to start the loop
+        while abs(accuracy) > self.eps and iterations < self.max_iterations:
             iterations += 1
 
             # step 1-2
             y_output = self.get_y()
+            print("y_output", y_output)
 
             # step 3
             deltas = []
             if not self.__expected_values:
                 raise ValueError("expected_values is empty")
             deltas.append([[expected - y] for expected, y in zip(self.__expected_values, y_output)])
+            # print("3. deltas", deltas)
+
+            accuracy = max(abs(*d) for d in deltas[0])
+            print(accuracy)
 
             # step 4
             for i in range(self.__number_of_hidden_layers, 0, -1):
@@ -147,6 +152,7 @@ class Network:
                         for d, w in zip(deltas[-1], self.weights[i][j])
                     ])
                 deltas.append(temp_deltas)
+            # print("4. deltas", deltas)
 
             # step 6
             w_deltas = []
@@ -170,12 +176,17 @@ class Network:
                     )
                 w_deltas_for_input_layer.append(w_delta)
             w_deltas.insert(0, w_deltas_for_input_layer)
+            # print("6. w_deltas", w_deltas)
 
             # step 7
             for i, weights_list in enumerate(w_deltas):
                 for j, weights in enumerate(weights_list):
                     for k, weight in enumerate(weights):
-                        self.weights[i][j][k] = weight + w_deltas[i][j][k]
+                        # print(weight, "+", w_deltas[i][j][k])
+                        self.weights[i][j][k] += w_deltas[i][j][k]
+
+            # print("7. self.weights", self.weights)
+            # print()
 
         return iterations
 
