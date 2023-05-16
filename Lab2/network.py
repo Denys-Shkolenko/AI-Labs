@@ -131,17 +131,14 @@ class Network:
 
             # step 1-2
             y_output = self.get_y()
-            # print("y_output", y_output)
 
             # step 3
             deltas = []
             if not self.__expected_values:
                 raise ValueError("expected_values is empty")
             deltas.append([[expected - y] for expected, y in zip(self.__expected_values, y_output)])
-            # print("3. deltas", deltas)
 
             accuracy = max(abs(*d) for d in deltas[0])
-            # print(accuracy)
 
             # step 4
             for i in range(self.__number_of_hidden_layers, 0, -1):
@@ -152,7 +149,6 @@ class Network:
                         for d, w in zip(deltas[-1], self.weights[i][j])
                     ])
                 deltas.append(temp_deltas)
-            # print("4. deltas", deltas)
 
             # step 6
             w_deltas = []
@@ -176,19 +172,12 @@ class Network:
                     )
                 w_deltas_for_input_layer.append(w_delta)
             w_deltas.insert(0, w_deltas_for_input_layer)
-            # print("6. w_deltas", w_deltas)
 
             # step 7
             for i, weights_list in enumerate(w_deltas):
                 for j, weights in enumerate(weights_list):
                     for k, weight in enumerate(weights):
-                        # print(weight, "+", w_deltas[i][j][k])
                         self.weights[i][j][k] += w_deltas[i][j][k]
-                # print(self.weights[i])
-
-            # print("7. self.weights", self.weights)
-            # print(self.__s_of_layers[0])
-            # print()
 
         return iterations
 
@@ -209,7 +198,5 @@ class Network:
         for i in range(self.size_of_output_layer):
             y_output.append(sum(s * w for s, w in zip(
                 self.__s_of_layers[-1], list(map(itemgetter(i), self.weights[-1])))))
-
-        # print("s", self.__s_of_layers)
 
         return y_output
