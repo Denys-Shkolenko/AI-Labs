@@ -39,7 +39,7 @@ class Network:
         self.__number_of_hidden_layers = len(sizes_of_hidden_layers)
         self.__number_of_layers = self.__number_of_hidden_layers + 2
         self.__sizes = [size_of_input_layer, *sizes_of_hidden_layers, size_of_output_layer]
-        self.__s_of_layers = []
+        self.__s_of_layers = [[0]]
 
         self.learning_rate = learning_rate
         self.eps = eps
@@ -111,7 +111,7 @@ class Network:
                              "size_of_input_layer parameter")
         if not all(isinstance(number, int) for number in input_data):
             raise TypeError("each item of the input_data must be an int")
-        self.__s_of_layers.insert(0, input_data)
+        self.__s_of_layers[0] = input_data
 
     def set_expected_values(self, expected_values: Sequence[float]):
         if not expected_values:
@@ -184,8 +184,10 @@ class Network:
                     for k, weight in enumerate(weights):
                         # print(weight, "+", w_deltas[i][j][k])
                         self.weights[i][j][k] += w_deltas[i][j][k]
+                # print(self.weights[i])
 
             # print("7. self.weights", self.weights)
+            # print(self.__s_of_layers[0])
             # print()
 
         return iterations
@@ -195,17 +197,19 @@ class Network:
             raise ValueError("input data is empty")
 
         # step 1
-        for i in range(self.number_of_hidden_layers):
+        for i in range(self.__number_of_hidden_layers):
             weighted_sums = []
             for j in range(self.sizes_of_hidden_layers[i]):
                 weighted_sums.append(sum(x * w for x, w in zip(
                     self.__s_of_layers[i], list(map(itemgetter(j), self.weights[i])))))
-            self.__s_of_layers.insert(i + 1, weighted_sums)  # __s_of_layers[0] == input_data
+            self.__s_of_layers[i + 1] = weighted_sums  # __s_of_layers[0] == input_data
 
         # step 2
         y_output = []
         for i in range(self.size_of_output_layer):
             y_output.append(sum(s * w for s, w in zip(
                 self.__s_of_layers[-1], list(map(itemgetter(i), self.weights[-1])))))
+
+        # print("s", self.__s_of_layers)
 
         return y_output
