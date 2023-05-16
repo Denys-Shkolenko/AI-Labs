@@ -13,7 +13,6 @@ class Network:
                  sizes_of_hidden_layers=(3, 2),
                  size_of_output_layer=2,
                  default_weight=1.0,
-                 input_data=(),
                  learning_rate=0.1,
                  eps=0.0001,
                  max_iterations=1_000_000,
@@ -37,13 +36,14 @@ class Network:
             raise ValueError("size_of_output_layer must be greater than 0")
         self.__size_of_output_layer = size_of_output_layer
 
+        self.__number_of_hidden_layers = len(sizes_of_hidden_layers)
+        # self.__number_of_layers = self.__number_of_hidden_layers + 2
         self.__s_of_layers = []
-        self.input_data = input_data
+
         self.learning_rate = learning_rate
         self.eps = eps
         self.max_iterations = max_iterations
         self.activation_func = activation_func
-        self.__number_of_hidden_layers = len(sizes_of_hidden_layers)
 
         # initialization of weights
         self.weights = []
@@ -63,22 +63,6 @@ class Network:
     @property
     def size_of_output_layer(self):
         return self.__size_of_output_layer
-
-    @property
-    def input_data(self):
-        return self.__input_data
-
-    @input_data.setter
-    def input_data(self, input_data: Sequence[int]):
-        if not len(input_data):
-            raise ValueError("input_data cannot be empty")
-        if len(input_data) != self.size_of_input_layer:
-            raise ValueError("the len of input_data must be equal to the "
-                             "size_of_input_layer parameter")
-        if not all(isinstance(number, int) for number in input_data):
-            raise TypeError("each item of the input_data must be an int")
-        self.__input_data = input_data
-        self.__s_of_layers[0] = input_data
 
     @property
     def learning_rate(self):
@@ -117,6 +101,19 @@ class Network:
     @property
     def number_of_hidden_layers(self):
         return self.__number_of_hidden_layers
+
+    def get_input_data(self):
+        return self.__s_of_layers[0]
+
+    def set_input_data(self, input_data: Sequence[int]):
+        if not input_data:
+            raise ValueError("input_data cannot be empty")
+        if len(input_data) != self.size_of_input_layer:
+            raise ValueError("the len of input_data must be equal to the "
+                             "size_of_input_layer parameter")
+        if not all(isinstance(number, int) for number in input_data):
+            raise TypeError("each item of the input_data must be an int")
+        self.__s_of_layers.insert(0, input_data)
 
     def start_training(self) -> int:
         iterations = 0
@@ -161,16 +158,13 @@ class Network:
         return iterations
 
     def get_y(self) -> list[float]:
-        if not self.input_data:
-            raise ValueError("input_data is empty")
-
         # step 1
         for i in range(self.number_of_hidden_layers):
             weighted_sums = []
             for j in range(self.sizes_of_hidden_layers[i]):
                 weighted_sums.append(sum(x * w for x, w in zip(
                     self.__s_of_layers[i], list(map(itemgetter(j), self.weights[i])))))
-            self.__s_of_layers[i + 1] = weighted_sums  # __s_of_layers[0] == input_data
+            self.__s_of_layers.insert(i + 1, weighted_sums)  # __s_of_layers[0] == input_data
 
         # step 2
         y_output = []
