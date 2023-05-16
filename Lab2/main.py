@@ -25,9 +25,9 @@ if __name__ == "__main__":
             network.set_expected_values(data["8-bit code"])
             iterations = network.start_training()
 
-    # testing
+    # testing of training data
     table = []
-    print("*" * 20, "TESTING", "*" * 20)
+    print("*" * 10, "TESTING OF TRAINING DATA", "*" * 10)
     for data in training_data:
         network.set_input_data(data["symbol"])
         network.set_expected_values(data["8-bit code"])
@@ -38,4 +38,21 @@ if __name__ == "__main__":
             ''.join(str(round(num - 0.1)) for num in network.get_y())
         ])
 
-    print(tabulate(table, headers=["Image", "Expected Value", "y", "Iterations"], tablefmt="orgtbl"))
+    print(tabulate(table, headers=["Image", "Expected Value", "y"], tablefmt="orgtbl"))
+    print("\n")
+
+    # tests
+    table = []
+    print("*" * 15, "TESTS", "*" * 15)
+    for data in training_data:
+        network.set_input_data(data["symbol"])
+        network.set_expected_values(data["8-bit code"])
+
+        table.append([
+            data["answer"],
+            ''.join(str(num) for num in data["8-bit code"]),
+            ''.join(str(round(num - 0.1)) for num in network.get_y())
+        ])
+
+    print(tabulate(table, headers=["Image", "Expected Value", "y"], tablefmt="orgtbl"))
+
