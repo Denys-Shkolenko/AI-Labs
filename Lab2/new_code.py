@@ -38,33 +38,33 @@ class NeuralNetwork:
 
     def train(self, x, y, learning_rate, epochs):
         for _ in range(epochs):
-            a = x
-            activations = [a]
-            zs = []
+            input_x = x
+            s = [input_x]
+            weighted_sums = []
 
             for i in range(len(self.weights)):
-                z = np.dot(a, self.weights[i]) + self.biases[i]
-                zs.append(z)
-                a = self.sigmoid(z)
-                activations.append(a)
+                weighted_sum = np.dot(input_x, self.weights[i]) + self.biases[i]
+                weighted_sums.append(weighted_sum)
+                input_x = self.sigmoid(weighted_sum)
+                s.append(input_x)
 
-            delta = self.cost_derivative(activations[-1], y) * self.sigmoid_derivative(zs[-1])
+            delta = self.get_delta(s[-1], y) * self.sigmoid_derivative(weighted_sums[-1])
 
             for i in range(len(self.weights) - 1, -1, -1):
-                gradient_weights = np.dot(activations[i].T, delta)
+                gradient_weights = np.dot(s[i].T, delta)
                 gradient_biases = np.sum(delta, axis=0)
 
                 self.weights[i] -= learning_rate * gradient_weights
                 self.biases[i] -= learning_rate * gradient_biases
 
                 if i > 0:
-                    delta = np.dot(delta, self.weights[i].T) * self.sigmoid_derivative(zs[i-1])
+                    delta = np.dot(delta, self.weights[i].T) * self.sigmoid_derivative(weighted_sums[i-1])
 
     def predict(self, x):
         return self.forward(x)
 
-    def cost_derivative(self, output_activations, y):
-        return output_activations - y
+    def get_delta(self, y_expected, y_actual):
+        return y_expected - y_actual
 
     def sigmoid_derivative(self, x):
         return self.sigmoid(x) * (1 - self.sigmoid(x))
@@ -141,6 +141,3 @@ if __name__ == "__main__":
         ])
 
     print(tabulate(table, headers=["Image", "Expected Value", "y"], tablefmt="orgtbl"))
-
-
-
