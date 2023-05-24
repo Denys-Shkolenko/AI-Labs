@@ -80,8 +80,8 @@ if __name__ == "__main__":
 
     for data in training_data:
         X.append(data['symbol'])
-        y.append(data['8-bit code'])
-        answers[tuple(data['8-bit code'])] = data['answer']
+        y.append(data['3-bit code'])
+        answers[tuple(data['3-bit code'])] = data['answer']
 
     X = np.array(X)
     y = np.array(y)
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     print("*" * 15, "TESTS", "*" * 15)
     for data in test_data:
         input_data = np.array([data['symbol']])
-        expected_output = np.array([data['8-bit code']])
+        expected_output = np.array([data['3-bit code']])
 
         predicted_output = nn.predict(input_data)
         predicted_output_rounded = np.round(predicted_output, 2)
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     print("*" * 15, "TESTS", "*" * 15)
     for data in test_data:
         input_data = np.array([data['symbol']])
-        expected_output = np.array([data['8-bit code']])
+        expected_output = np.array([data['3-bit code']])
 
         predicted_output = nn2.predict(input_data)
         predicted_output_rounded = np.round(predicted_output, 2)

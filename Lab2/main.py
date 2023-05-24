@@ -22,7 +22,7 @@ if __name__ == "__main__":
     for _ in range(1000):
         for data in training_data:
             network.set_input_data(data["symbol"])
-            network.set_expected_values(data["8-bit code"])
+            network.set_expected_values(data["3-bit code"])
             iterations = network.start_training()
 
     # testing of training data
@@ -30,11 +30,11 @@ if __name__ == "__main__":
     print("*" * 10, "TESTING OF TRAINING DATA", "*" * 10)
     for data in training_data:
         network.set_input_data(data["symbol"])
-        network.set_expected_values(data["8-bit code"])
+        network.set_expected_values(data["3-bit code"])
 
         table.append([
             data["answer"],
-            ''.join(str(num) for num in data["8-bit code"]),
+            ''.join(str(num) for num in data["3-bit code"]),
             ' '.join(str(round(num - 0.1, 4)) for num in network.get_y())
         ])
 
@@ -46,11 +46,11 @@ if __name__ == "__main__":
     print("*" * 15, "TESTS", "*" * 15)
     for data in training_data:
         network.set_input_data(data["symbol"])
-        network.set_expected_values(data["8-bit code"])
+        network.set_expected_values(data["3-bit code"])
 
         table.append([
             data["answer"],
-            ''.join(str(num) for num in data["8-bit code"]),
+            ''.join(str(num) for num in data["3-bit code"]),
             ' '.join(str(round(num - 0.1, 4)) for num in network.get_y())
         ])
 

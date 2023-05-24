@@ -27,17 +27,11 @@ def genetic_algorithm():
             worst_fitness = min(fitness)
             worst_solution = population[fitness.index(min(fitness))]
 
-        # Селекція
         selected_parents = selection(population, fitness)
-
-        # Схрещування
         offspring = crossover(selected_parents)
-
-        # Мутація
         mutated_offspring = mutation(offspring)
-
-        # Заміна популяції новими індивідами
         population = mutated_offspring
+        print(population)
 
     return best_solution, best_fitness, worst_solution, worst_fitness, fitness_history
 
@@ -71,8 +65,7 @@ def mutation(offspring):
     return mutated_offspring
 
 
-def evaluate_fitness(individual):
-    x = individual
+def evaluate_fitness(x):
     fitness = 5 * math.sin(x) * math.cos((x**2) + (1 / x))**2
     return fitness
 
