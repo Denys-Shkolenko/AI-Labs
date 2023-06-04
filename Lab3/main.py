@@ -1,90 +1,95 @@
 import matplotlib.pyplot as plt
-
 import random
 import math
+from tabulate import tabulate
 
 
-def genetic_algorithm():
-    population_size = 100
-    generations = 50
-    best_solution = None
-    worst_solution = None
-    best_fitness = float('-inf')
-    worst_fitness = float('inf')
-    fitness_history = []
-
-    for _ in range(generations):
-        population = [random.uniform(1, 10) for _ in range(population_size)]
-
-        fitness = [evaluate_fitness(x) for x in population]
-        fitness_history.append(max(fitness))
-
-        if max(fitness) > best_fitness:
-            best_fitness = max(fitness)
-            best_solution = population[fitness.index(max(fitness))]
-
-        if min(fitness) < worst_fitness:
-            worst_fitness = min(fitness)
-            worst_solution = population[fitness.index(min(fitness))]
-
-        selected_parents = selection(population, fitness)
-        offspring = crossover(selected_parents)
-        mutated_offspring = mutation(offspring)
-        population = mutated_offspring
-        print(population)
-
-    return best_solution, best_fitness, worst_solution, worst_fitness, fitness_history
+def fitness_function(x):
+    return 5 * math.sin(x) * math.cos(x ** 2 + 1 / x) ** 2
 
 
-def selection(population, fitness):
-    total_fitness = sum(fitness)
-    probabilities = [f / total_fitness for f in fitness]
-    selected_parents = random.choices(population, weights=probabilities, k=len(population))
-    return selected_parents
+def decode_chromosome(chromosome, xmin, xmax, nb):
+    n = int("".join(map(str, chromosome)), 2)
+    return xmin + n * (xmax - xmin) / (2 ** nb - 1)
 
 
-def crossover(parents):
-    offspring = []
-    for i in range(0, len(parents), 2):
-        parent1 = parents[i]
-        parent2 = parents[i+1]
-        child = (parent1 + parent2) / 2.0
-        offspring.append(child)
-    return offspring
+def evaluate_population_fitness(population, xmin, xmax, nb):
+    fitness_values = []
+    for chromosome in population:
+        x = decode_chromosome(chromosome, xmin, xmax, nb)
+        fitness = fitness_function(x)
+        fitness_values.append(fitness)
+    return fitness_values
 
 
-def mutation(offspring):
-    mutated_offspring = []
-    mutation_rate = 0.1
-    for child in offspring:
-        if random.random() < mutation_rate:
-            mutated_child = child + random.uniform(-0.5, 0.5)
-            mutated_offspring.append(mutated_child)
-        else:
-            mutated_offspring.append(child)
-    return mutated_offspring
+def create_initial_population(population_size, chromosome_length):
+    population = []
+    for _ in range(population_size):
+        chromosome = [random.randint(0, 1) for _ in range(chromosome_length)]
+        population.append(chromosome)
+    return population
 
 
-def evaluate_fitness(x):
-    fitness = 5 * math.sin(x) * math.cos((x**2) + (1 / x))**2
-    return fitness
+def genetic_algorithm(population_size, chromosome_length, xmin, xmax, nb, generations):
+    population = create_initial_population(population_size, chromosome_length)
+
+    table = []
+    headers = ["Generation", "Best Solution (x, y)", "Worst Solution (x, y)"]
+
+    for generation in range(generations):
+        fitness_values = evaluate_population_fitness(population, xmin, xmax, nb)
+
+        best_fitness = max(fitness_values)
+        worst_fitness = min(fitness_values)
+
+        best_chromosome = population[fitness_values.index(best_fitness)]
+        worst_chromosome = population[fitness_values.index(worst_fitness)]
+
+        x_best = decode_chromosome(best_chromosome, xmin, xmax, nb)
+        y_best = best_fitness
+        x_worst = decode_chromosome(worst_chromosome, xmin, xmax, nb)
+        y_worst = worst_fitness
+
+        table.append([generation + 1,
+                      (round(x_best, 8), round(y_best, 8)),
+                      (round(x_worst, 8), round(y_worst, 8))])
+
+        new_population = [best_chromosome, worst_chromosome]
+
+        # Generation of new chromosomes by crossover
+        while len(new_population) < population_size:
+            parent1 = random.choice(population)
+            parent2 = random.choice(population)
+
+            crossover_point = random.randint(1, chromosome_length - 1)
+            child1 = parent1[:crossover_point] + parent2[crossover_point:]
+            child2 = parent2[:crossover_point] + parent1[crossover_point:]
+
+            new_population.append(child1)
+            new_population.append(child2)
+
+        # Replacing the previous population with a new one
+        population = new_population
+
+    print(tabulate(table, headers=headers, tablefmt="grid"))
 
 
 if __name__ == "__main__":
+    population_size = 50
+    chromosome_length = 32
+    xmin = 1
+    xmax = 10
+    nb = chromosome_length
+    generations = 50
 
-    best_solution, best_fitness, worst_solution, worst_fitness, fitness_history = genetic_algorithm()
-
-    print("Найкраще рішення (максимум):", best_solution)
-    print("Найкращий фітнес (максимум):", best_fitness)
-    print("Найгірше рішення (мінімум):", worst_solution)
-    print("Найгірший фітнес (мінімум):", worst_fitness)
+    genetic_algorithm(population_size, chromosome_length, xmin, xmax, nb, generations)
 
     x_values = [x / 100 for x in range(100 * 1, 100 * 11)]
-    y_values = [evaluate_fitness(x) for x in x_values]
+    y_values = [fitness_function(x) for x in x_values]
 
     plt.plot(x_values, y_values)
-    plt.xlabel('x')
-    plt.ylabel('Y(x)')
-    plt.title('Графік функції Y(x) = 5 * sin(x) * cos((x**2) + (1 / x))**2')
+    plt.xlabel("x")
+    plt.ylabel("Y(x)")
+    plt.title("Graph of the function Y(x) = 5sin(x)cos(x^2 + 1/x)^2")
     plt.grid(True)
     plt.show()

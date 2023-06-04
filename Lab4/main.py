@@ -26,20 +26,27 @@ def choose_action(Q, R, state, epsilon):
     return action
 
 
+from tabulate import tabulate
+
 def print_matrix(matrix):
-    num_rows = len(matrix)
-    num_cols = len(matrix[0])
+    table = [[i] + row for i, row in enumerate(matrix)]
+    print(tabulate(table, headers=list(range(len(matrix[0]))), tablefmt="grid"))
 
-    header = "     "
-    for j in range(num_cols):
-        header += f"{j:7d}"
-    print(header)
 
-    for i in range(num_rows):
-        row = f"{i:3d} |"
-        for j in range(num_cols):
-            row += f"{matrix[i][j]:7.2f}"
-        print(row)
+# def print_matrix(matrix):
+#     num_rows = len(matrix)
+#     num_cols = len(matrix[0])
+#
+#     header = "     "
+#     for j in range(num_cols):
+#         header += f"{j:7d}"
+#     print(header)
+#
+#     for i in range(num_rows):
+#         row = f"{i:3d} |"
+#         for j in range(num_cols):
+#             row += f"{matrix[i][j]:7.2f}"
+#         print(row)
 
 
 if __name__ == "__main__":
