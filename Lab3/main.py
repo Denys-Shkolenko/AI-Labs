@@ -8,15 +8,15 @@ def fitness_function(x):
     return 5 * math.sin(x) * math.cos(x ** 2 + 1 / x) ** 2
 
 
-def decode_chromosome(chromosome, xmin, xmax, nb):
+def decode_chromosome(chromosome, xmin, xmax, chromosome_length):
     n = int("".join(map(str, chromosome)), 2)
-    return xmin + n * (xmax - xmin) / (2 ** nb - 1)
+    return xmin + n * (xmax - xmin) / (2 ** chromosome_length - 1)
 
 
-def evaluate_population_fitness(population, xmin, xmax, nb):
+def evaluate_population_fitness(population, xmin, xmax, chromosome_length):
     fitness_values = []
     for chromosome in population:
-        x = decode_chromosome(chromosome, xmin, xmax, nb)
+        x = decode_chromosome(chromosome, xmin, xmax, chromosome_length)
         fitness = fitness_function(x)
         fitness_values.append(fitness)
     return fitness_values
@@ -38,14 +38,14 @@ def mutate_chromosome(chromosome, mutation_rate):
     return chromosome
 
 
-def genetic_algorithm(population_size, chromosome_length, xmin, xmax, nb, generations):
+def genetic_algorithm(population_size, chromosome_length, xmin, xmax, generations):
     population = create_initial_population(population_size, chromosome_length)
 
     table = []
     headers = ["Generation", "Best Solution (x, y)", "Worst Solution (x, y)"]
 
     for generation in range(generations):
-        fitness_values = evaluate_population_fitness(population, xmin, xmax, nb)
+        fitness_values = evaluate_population_fitness(population, xmin, xmax, chromosome_length)
 
         best_fitness = max(fitness_values)
         worst_fitness = min(fitness_values)
@@ -53,14 +53,15 @@ def genetic_algorithm(population_size, chromosome_length, xmin, xmax, nb, genera
         best_chromosome = population[fitness_values.index(best_fitness)]
         worst_chromosome = population[fitness_values.index(worst_fitness)]
 
-        x_best = decode_chromosome(best_chromosome, xmin, xmax, nb)
+        x_best = decode_chromosome(best_chromosome, xmin, xmax, chromosome_length)
         y_best = best_fitness
-        x_worst = decode_chromosome(worst_chromosome, xmin, xmax, nb)
+        x_worst = decode_chromosome(worst_chromosome, xmin, xmax, chromosome_length)
         y_worst = worst_fitness
 
-        table.append([generation + 1,
-                      (round(x_best, 8), round(y_best, 8)),
-                      (round(x_worst, 8), round(y_worst, 8))])
+        if generation % 10 == 0:
+            table.append([generation,
+                          (round(x_best, 8), round(y_best, 8)),
+                          (round(x_worst, 8), round(y_worst, 8))])
 
         new_population = [best_chromosome, worst_chromosome]
 
@@ -88,15 +89,14 @@ def genetic_algorithm(population_size, chromosome_length, xmin, xmax, nb, genera
 
 
 if __name__ == "__main__":
-    population_size = 50
+    population_size = 100
     chromosome_length = 32
     xmin = 1
     xmax = 10
-    nb = chromosome_length
-    generations = 50
+    generations = 101
     mutation_rate = 0.01
 
-    genetic_algorithm(population_size, chromosome_length, xmin, xmax, nb, generations)
+    genetic_algorithm(population_size, chromosome_length, xmin, xmax, generations)
 
     x_values = [x / 100 for x in range(100 * 1, 100 * 11)]
     y_values = [fitness_function(x) for x in x_values]
