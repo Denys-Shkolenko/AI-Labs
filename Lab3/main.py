@@ -30,6 +30,14 @@ def create_initial_population(population_size, chromosome_length):
     return population
 
 
+def mutate_chromosome(chromosome, mutation_rate):
+    for i in range(len(chromosome)):
+        if random.random() < mutation_rate:
+            chromosome[i] = 1 - chromosome[i]  # Flip the bit
+
+    return chromosome
+
+
 def genetic_algorithm(population_size, chromosome_length, xmin, xmax, nb, generations):
     population = create_initial_population(population_size, chromosome_length)
 
@@ -68,6 +76,11 @@ def genetic_algorithm(population_size, chromosome_length, xmin, xmax, nb, genera
             new_population.append(child1)
             new_population.append(child2)
 
+        # Mutation
+        for i in range(2, population_size):
+            mutated_chromosome = mutate_chromosome(new_population[i], mutation_rate)
+            new_population[i] = mutated_chromosome
+
         # Replacing the previous population with a new one
         population = new_population
 
@@ -81,6 +94,7 @@ if __name__ == "__main__":
     xmax = 10
     nb = chromosome_length
     generations = 50
+    mutation_rate = 0.01
 
     genetic_algorithm(population_size, chromosome_length, xmin, xmax, nb, generations)
 
